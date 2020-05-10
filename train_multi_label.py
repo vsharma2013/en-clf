@@ -162,11 +162,7 @@ if __name__ == "__main__":
         validation_split=VALIDATION_SPLIT
     )
 
-    sess = K.get_session()
-
-    tf.saved_model.simple_save(
-        sess,
-        os.path.join(model_dir, 'model/1'),
-        inputs = {'inputs': model.input},
-        outputs = {t.name: t for t in model.outputs}
+    tf.saved_model.save(
+        model,
+        os.path.join(model_dir, 'model/1')
     )
