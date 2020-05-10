@@ -16,28 +16,33 @@ import tensorflow.keras.backend as K
 
 import gensim
 
-s3_embeddings_bin = 's3://zomato-autophrase-poc-zvissh/entity-classifier/model/GoogleNews-vectors-negative300.bin'
-s3_train_csv = 's3://zomato-autophrase-poc-zvissh/entity-classifier/data/entity_train.csv'
+def get_one_hot(lbl):
+    one_hot_y = np.zeros(9)
+    one_hot_y[lbl - 1] = 1
+    return one_hot_y
 
-emb_model = None
-train = None
-word2vec = {}
-sentences = None
-targets = None
-sequences = None
-data = None
-embedding_matrix = None
-num_words = 0
-model = None
+def run():
+    s3_embeddings_bin = 's3://zomato-autophrase-poc-zvissh/entity-classifier/model/GoogleNews-vectors-negative300.bin'
+    s3_train_csv = 's3://zomato-autophrase-poc-zvissh/entity-classifier/data/entity_train.csv'
 
-MAX_SEQUENCE_LENGTH = 300
-MAX_VOCAB_SIZE = 40000
-EMBEDDING_DIM = 300
-VALIDATION_SPLIT = 0.2
-BATCH_SIZE = 128
-EPOCHS = 1
+    emb_model = None
+    train = None
+    word2vec = {}
+    sentences = None
+    targets = None
+    sequences = None
+    data = None
+    embedding_matrix = None
+    num_words = 0
+    model = None
 
-def init():
+    MAX_SEQUENCE_LENGTH = 300
+    MAX_VOCAB_SIZE = 40000
+    EMBEDDING_DIM = 300
+    VALIDATION_SPLIT = 0.2
+    BATCH_SIZE = 128
+    EPOCHS = 1
+
     print('\n\nLoading embeddings...')
     emb_model = gensim.models.KeyedVectors.load_word2vec_format(s3_embeddings_bin, binary=True)
     print('Embeddings loaded SUCCESSFYLLY!!!')
@@ -46,18 +51,14 @@ def init():
     train = pd.read_csv(s3_train_csv)
     print('Loaded train csv SUCCESSFULLY!!!')
 
-    
+
     print('Init word2vec...')
     for word, vec in emb_model.vocab.items():
         word2vec[word] = emb_model.get_vector(word)
     print('Word2Vec init SUCCESSFULLY!!!')
 
-def get_one_hot(lbl):
-    one_hot_y = np.zeros(9)
-    one_hot_y[lbl - 1] = 1
-    return one_hot_y
 
-def pre_process_data():
+
     sentences = train['phrase'].fillna('DUMMY_VALUES').values
     targets = np.array([ get_one_hot(l) for l in list(train['label'].values)])
     tokenizer = Tokenizer(num_words=MAX_VOCAB_SIZE)
@@ -76,7 +77,6 @@ def pre_process_data():
                 # words not found in embedding index will be all zeros.
                 embedding_matrix[i] = word2vec[word]
 
-def build_and_run_model():
     print('Building model...')
     embedding_layer = Embedding(
         num_words,
@@ -107,12 +107,6 @@ def build_and_run_model():
         epochs=EPOCHS,
         validation_split=VALIDATION_SPLIT
     )
-
-def run():
-    init()
-    pre_process_data()
-    build_and_run_model()
-
 
 if __name__ == "__main__":
     run()
