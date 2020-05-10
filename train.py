@@ -38,12 +38,12 @@ BATCH_SIZE = 128
 EPOCHS = 1
 
 def init():
-    print('Loading embeddings...')
+    print('\n\nLoading embeddings...')
     emb_model = gensim.models.KeyedVectors.load_word2vec_format(s3_embeddings_bin, binary=True)
     print('Embeddings loaded SUCCESSFYLLY!!!')
 
     print('Laoding train csv...')
-    train = pd.load_csv(s3_train_csv)
+    train = pd.read_csv(s3_train_csv)
     print('Loaded train csv SUCCESSFULLY!!!')
 
     
