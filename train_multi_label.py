@@ -144,7 +144,7 @@ if __name__ == "__main__":
     x = embedding_layer(input_)
     x = LSTM(15, return_sequences=True)(x)
     x = GlobalMaxPool1D()(x)
-    output = Dense(9, activation="sigmoid")(x)
+    output = Dense(4, activation="sigmoid")(x)
 
     model = Model(input_, output)
     model.compile(
